@@ -1,0 +1,5 @@
+<form action="{% url 'demo feature' %}" method="post" >
+    {% csrf_token %}
+    {{forms.as_p}}
+    <button type="submit">Save</button>
+</form>

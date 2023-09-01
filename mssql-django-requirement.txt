@@ -1,0 +1,6 @@
+django
+pyodbc
+mssql-django
+pillow
+gunicorn
+mysqlclient

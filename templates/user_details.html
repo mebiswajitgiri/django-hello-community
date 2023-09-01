@@ -1,0 +1,77 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Profile Page</title>
+<link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+
+    <header class="header">
+            <div class="left-section">
+                <div class="avatar-circle">
+                    <img src="{{ user_avatar_url }}">
+                </div>
+              <span>{{username}}</span>
+            </div>
+        <h1>Community Club</h1>
+        <div class="right-section">
+            <a href="{% url 'home page' %}"><button class="nav-button">Feed</button></a>
+            <a href="{% url 'logout user' %}"><button class="nav-button">Sign Out</button></a>
+        </div>
+      </header>
+      <div>
+        <h1>Name: {{name}}</h1>
+      </div>
+
+
+{% for post_and_comment in posts_and_comments%}
+<div class="posts">
+    <div class="post">
+        <div class="post-header">
+            <h3>{{post_and_comment.0.post_tittle}}</h3>
+        </div>
+        {% if post_and_comment.0.post_img != "" %}
+        <img class="post-img" src="{{post_and_comment.0.post_img.url}}" >
+        {% endif %}
+        <p>{{post_and_comment.0.post_content}}</p>
+    </div>
+
+
+    <form action="{% url 'comment on post' post_and_comment.0.id %}" method="post">
+        {% csrf_token %}
+        <div class="comment-input">
+            <input type="text" class="comment-field" name="comment_on_post" placeholder="Enter your comment...">
+            <button type="submit" class="comment-button">Comment</button>
+        </div>
+    </form>
+
+
+    <div class="comment-list">
+        {% for comment in post_and_comment.1 %}
+        <div class="row">
+            <p><strong>{{comment.user.username}}:</strong>{{comment.comment}}</p>
+            <div class="buttons">
+                {% if comment.user.id == request.user.id %}
+                <a href="{% url 'edit comment' post_and_comment.0.id comment.id %}"><button class="edit-button"><img src="{% static 'edit-icon.png' %}" alt="Edit"></button></a>
+                {% endif %}
+                {% if comment.user.id == request.user.id or request.user.id == post_and_comment.0.user.id %}
+                <a href="{% url 'delete comment' post_and_comment.0.id comment.id %}"><button class="delete-button"><img src="{% static 'delete-icon.png' %}" alt="Delete"></button></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+</div>
+{% endfor %}
+
+
+
+</body>
+</html>

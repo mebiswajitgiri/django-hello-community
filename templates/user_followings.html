@@ -1,0 +1,4 @@
+<a href="{% url 'user home page' %}"><button>Home Page</button></a>
+{% for username in followings %}
+<a href="{% url 'user details' username %}"><h3>{{username}}</h3></a>
+{% endfor %}

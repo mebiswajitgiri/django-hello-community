@@ -1,0 +1,89 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Media Feed</title>
+<link rel="stylesheet" href="{% static 'home_style.css' %}">
+</head>
+<body>
+
+    <header class="header">
+        <div class="left-section">
+          <span>{{name}}</span>
+        </div>
+        {% if user.is_authenticated %}
+        <h1>Community Club</h1>
+        <div class="right-section">
+            <a href="{% url 'user home page' %}"><button class="nav-button">Home</button></a>
+            <a href="{% url 'logout user' %}"><button class="nav-button">Sign out</button></a>
+        </div>
+        {% else %}
+        <h1>Community Club</h1>
+        <div class="right-section">
+            <a href="{% url 'login page' %}"><button class="nav-button">login</button></a>
+            <a href="{% url 'signup page' %}"><button class="nav-button">sign up</button></a>
+        </div>
+        {% endif %}
+    </header>
+
+
+<div class="feed">
+    <!-- Add more posts here -->
+    {% for post_and_comment in posts_and_comments%}
+    <div class="post" >
+        <div class="user-info">
+            <a href="{% url 'user details' post_and_comment.0.user.username %}"><img class="profile-image" src={{post_and_comment.0.user.avatar.url}} alt="User Profile Image"></a>
+          <h3>@{{post_and_comment.0.user.username}}</h3>
+          {% if request.user.id == post_and_comment.0.user.id %}
+          <a href="{% url 'follow user' post_and_comment.0.user.username %}"><button>Your Post</button></a>
+          {% elif post_and_comment.2 %}
+          <a href="{% url 'unfollow user' post_and_comment.0.user.username %}"><button>Following</button></a>
+          {% else %}
+          {% if post_and_comment.0.user.id != user.id %}
+          <a href="{% url 'follow user' post_and_comment.0.user.username %}"><button>Follow</button></a>
+          {% endif %}
+          {% endif %}
+        </div>
+        <div class="post-content">
+            <p>{{post_and_comment.0.post_content}}</p>
+        </div>
+        {% if post_and_comment.0.post_img != "" %}
+        <div class="image-container">
+            <img class="post-image" src={{post_and_comment.0.post_img.url}} >
+        </div>
+        {% endif %}
+        <form action="/comment/{{post_and_comment.0.id}}" method="post">
+            <div class="comment-input">
+                {% csrf_token %}
+                <input type="text" class="comment-field" name="comment_on_post" placeholder="Enter your comment...">
+                <button type="submit" class="comment-button">Comment</button>
+            </div>           
+        </form>
+
+        <div class="comment-list">
+            {% for comment in post_and_comment.1 %}
+            <div class="row">
+                <p><strong>{{comment.user.username}}:</strong>{{comment.comment}}</p>
+                <div class="buttons">
+                    {% if comment.user.id == request.user.id %}
+                    <a href="{% url 'edit comment' post_and_comment.0.id comment.id %}"><button class="edit-button"><img src="{% static 'edit-icon.png' %}" alt="Edit"></button></a>
+                    {% endif %}
+                    {%  if comment.user.id == request.user.id or request.user.id == post_and_comment.0.user.id %}
+                    <a href="{% url 'delete comment' post_and_comment.0.id comment.id %}"><button class="delete-button"><img src="{% static 'delete-icon.png' %}" alt="Delete"></button></a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        
+    </div>
+    {% endfor %}
+
+</div>
+</body>
+</html>
