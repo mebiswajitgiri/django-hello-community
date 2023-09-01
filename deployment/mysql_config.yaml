@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-server-config
+  labels:
+    type: configmap
+    pltform: mysql
+    env: practice
+  namespace: ns-bg
+data:
+  password: "password"
+  database_name: "django"

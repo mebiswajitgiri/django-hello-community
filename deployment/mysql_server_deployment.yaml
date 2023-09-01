@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server-deployment
+  labels:
+    type: deployment
+    pltfrm: mysql
+    env: practice
+  namespace: ns-bg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: pod
+      pltform: mysql
+      env: practice
+  template:
+    metadata:
+      name: mysql-server-pod
+      labels:
+        type: pod
+        pltform: mysql
+        env: practice
+    spec:
+      containers:
+        - name: mysql-server
+          image: mysql:8-debian
+          ports:
+          - containerPort: 3306
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: mysql-server-config
+                key: password
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mysql-server-config
+                key: database_name
+          # volumeMounts:
+          # - name: mysql-data
+          #   mountPath: /var/lib/mysql
+          #   subPath: mysql
+      # volumes:
+      #   - name: mysql-data
+      #     persistentVolumeClaim:
+      #       claimName: mysql-data-pvc
+          
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-mysql-svc
+  labels:
+    type: clusterip
+    pltform: mysql
+    env: practice
+  namespace: ns-bg
+spec:
+  ports:
+  - port: 3307
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    type: pod
+    pltform: mysql
+    env: practice
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-mysql-svc-load
+  labels:
+    type: loadbalancer
+    pltform: mysql
+    env: practice
+  namespace: ns-bg
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    type: pod
+    pltform: mysql
+    env: practice
+  type: LoadBalancer

@@ -1,0 +1,82 @@
+#kn
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: community-club-django-app-deployment
+  labels:
+    type: deployment
+    pltfrm: django
+    env: practice
+  namespace: ns-bg
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      type: pod
+      pltform: django
+      env: practice
+  template:
+    metadata:
+      name: django-app-pod
+      labels:
+        type: pod
+        pltform: django
+        env: practice
+    spec:  
+      containers:
+        - name: django-app
+          image: acrdsteamrnd001.azurecr.io/bg/community_club_django_app:v30
+          ports:
+          - containerPort: 3000
+          command: ["/bin/bash"]
+          args: ["-c", "./migrate.sh && ./entrypoint.sh"]
+          env:
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: config-django-app
+                  key: database_name
+            - name: DATABASE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config-django-app
+                  key: host
+            - name: DATABASE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: config-django-app
+                  key: port
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: django-app-secret
+                  key: password
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: django-app-secret
+                  key: username
+      imagePullSecrets:
+      - name: docker-config-secret
+      
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-app-svc
+  labels:
+    type: loadbalancer
+    pltform: django
+    env: practice
+  namespace: ns-bg
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    type: pod
+    pltform: django
+    env: practice
+  type: LoadBalancer

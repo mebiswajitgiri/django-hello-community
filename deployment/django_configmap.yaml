@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-django-app
+  labels:
+    type: configmap
+    pltform: django
+    env: practice
+  namespace: ns-bg
+data:
+  host: "server-mysql-svc.ns-bg.svc.cluster.local"
+  port: "3307"
+  database_name: "django"
